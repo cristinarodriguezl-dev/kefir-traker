@@ -1,3 +1,4 @@
+# pyrefly: ignore[missing-import]
 import questionary
 from calculations import milk_needed, calculate_average_ratio
 from storage import load_history, save_fermentation
@@ -31,7 +32,7 @@ def main_menu ():
             )
             result = questionary.select(
                 "¿Cómo ha quedado la fermentación?",
-                choices=["buena", "sobrefermentada", "insuficiente"]
+                choices=["Buena", "Sobrefermentada", "Insuficiente", "Dañado"]
             ).ask()
 
             fermentation = {
@@ -68,11 +69,48 @@ def main_menu ():
                 ]
 
                 ratio = calculate_average_ratio(ratios)
-                print(f"Cantidad de leche recomendada: {milk_needed(grains_weight, ratio):.0f} ml")
+                milk = milk_needed(grains_weight, ratio)
+                print(f"Cantidad de leche recomendada: {milk:.0f} ml")
 
 
         elif option =="Consultar historial":
-            print("Historial pendiente")
+            history = load_history()
+            if not history:
+                print("No hay fermentaciones registradas")
+            else:
+                for index, fermentation in enumerate(history, start=1):
+                    print(f"Fermentación {index}")
+                    print(f"Gránulos: {fermentation['grains_weight']}g")
+                    print(f"Leche: {fermentation['milk_ml']}ml")
+                    print(f"Horas de fermentación: {fermentation['duration_hours']}h")
+                    print(f"Resultado: {fermentation['result']}")
+                    print("----------------")
+
         elif option == "Ver estadísticas":
-            print("Estadísticas pendientes")
-            
+            history = load_history()
+
+            if not history:
+                print("No hay fermentaciones registradas.")
+            else:
+                total = len(history)
+                good = sum(1 for fermentation in history if fermentation["result"] == "Buena")
+                overfermented = sum(1 for fermentation in history if fermentation["result"] == "Sobrefermentada")
+                insufficient = sum(1 for fermentation in history if fermentation["result"] == "Insuficiente")
+                damage = sum(1 for fermentation in history if fermentation["result"] == "Dañado")
+
+                print(f"Total: {total}")
+                print(f"Resultados buenos: {good}")
+                print(f"Sobrefermentaciones: {overfermented}")
+                print(f"Fermentaciones insuficientes: {insufficient}")
+                print(f"Dañadas: {damage}")
+
+                good_percentage = (good / total * 100)
+
+                print(f"Porcentaje de éxito: {good_percentage:.1f}%")
+
+                if overfermented > insufficient and overfermented > damage:
+                    print("Sugerencia: Reduce las horas de fermentación o la temperatura a la que fermentan tus gránulos.")
+                elif insufficient > overfermented and insufficient > damage:
+                    print("Sugerencia: Aumenta las horas de fermentación o la cantidad de leche.")
+                elif damage > overfermented and damage > insufficient:
+                    print("Sugerencia: Revisa tus gránulos de kéfir. Puede ser necesario reemplazarlos, cambiar su lugar de fermentación o lavar cuidadosamente los utensilios que usas.")
