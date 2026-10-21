@@ -1,3 +1,4 @@
+#Validación del cálculo de la leche
 def validate_milk_needed(grains_weight, ratio):
     if not isinstance(grains_weight, (float, int)) or not isinstance(ratio, (float, int)):
         raise ValueError("La cantidad debe ser un número")
