@@ -1,7 +1,7 @@
 # pyrefly: ignore[missing-import]
 import questionary
-from calculations import milk_needed, calculate_average_ratio
-from storage import load_history, save_fermentation, delete_fermentation
+from src.calculations import milk_needed, calculate_average_ratio
+from src.storage import load_history, save_fermentation, delete_fermentation
 
 
 def main_menu ():

@@ -1,4 +1,4 @@
-from validations import validate_milk_needed
+from src.validations import validate_milk_needed
 
 """Calcula la cantidad de leche que hay que añadir por la cantidad de gramos de gránulos de kéfir"""
 
