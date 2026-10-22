@@ -47,20 +47,18 @@ def main_menu ():
         
         
         elif option == "Calcular cantidad de leche necesaria":
-            grains_weight = float(
-                questionary.text("Ingrese los gramos de gránulos de kéfir:").ask()
-            )
-
             history = load_history()
-
             successful = [
                 fermentation for fermentation in history
                 if fermentation["result"] == "buena"
             ]
-
             if len(successful) < 3:
                 print("Necesitas al menos 3 fermentaciones buenas para hacer la recomendación.")
+
             else:
+                grains_weight = float(
+                questionary.text("Ingrese los gramos de gránulos de kéfir:").ask()
+            )
                 best_fermentations = successful[:3]
 
                 ratios = [
@@ -79,12 +77,13 @@ def main_menu ():
                 print("No hay fermentaciones registradas")
             else:
                 for index, fermentation in enumerate(history, start=1):
+                    print()
                     print(f"Fermentación {index}")
                     print(f"Gránulos: {fermentation['grains_weight']}g")
                     print(f"Leche: {fermentation['milk_ml']}ml")
                     print(f"Horas de fermentación: {fermentation['duration_hours']}h")
                     print(f"Resultado: {fermentation['result']}")
-                    print("----------------")
+                    print("\n***********************")
 
         elif option == "Ver estadísticas":
             history = load_history()
@@ -109,8 +108,8 @@ def main_menu ():
                 print(f"Porcentaje de éxito: {good_percentage:.1f}%")
 
                 if overfermented > insufficient and overfermented > damage:
-                    print("Sugerencia: Reduce las horas de fermentación o la temperatura a la que fermentan tus gránulos.")
+                    print("\nSugerencia: Reduce las horas de fermentación o la temperatura a la que fermentan tus gránulos.\n")
                 elif insufficient > overfermented and insufficient > damage:
-                    print("Sugerencia: Aumenta las horas de fermentación o la cantidad de leche.")
+                    print("\nSugerencia: Aumenta las horas de fermentación o la cantidad de leche.\n")
                 elif damage > overfermented and damage > insufficient:
-                    print("Sugerencia: Revisa tus gránulos de kéfir. Puede ser necesario reemplazarlos, cambiar su lugar de fermentación o lavar cuidadosamente los utensilios que usas.")
+                    print("\nSugerencia: Revisa tus gránulos de kéfir. Puede ser necesario reemplazarlos, cambiar su lugar de fermentación o lavar cuidadosamente los utensilios que usas.\n")
