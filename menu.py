@@ -1,7 +1,7 @@
 # pyrefly: ignore[missing-import]
 import questionary
 from calculations import milk_needed, calculate_average_ratio
-from storage import load_history, save_fermentation
+from storage import load_history, save_fermentation, delete_fermentation
 
 
 def main_menu ():
@@ -11,6 +11,7 @@ def main_menu ():
             choices=[
                 "Calcular cantidad de leche necesaria",
                 "Registrar fermentación",
+                "Eliminar fermentación",
                 "Consultar historial",
                 "Ver estadísticas",
                 "Salir"
@@ -45,12 +46,40 @@ def main_menu ():
             save_fermentation(fermentation)
             print("Fermentación guardada correctamente.")
         
+        elif option == "Eliminar fermentación":
+            history = load_history()
+
+            if not history:
+                print("No hay fermentaciones guardadas.")
+            else:
+                choices = [
+                    f"{i}. {f['result']} - {f['grains_weight']} g de kéfir, {f['milk_ml']} ml de leche"
+                    for i, f in enumerate(history, start=1)
+                ]
+
+                selected = questionary.select(
+                    "¿Qué fermentación quieres eliminar?",
+                    choices=choices
+                ).ask()
+
+                if selected is not None:
+                    confirm = questionary.select(
+                        "¿Seguro que quieres eliminar esta fermentación?",
+                        choices=["Sí", "No"]
+                    ).ask()
+
+                    if confirm == "Sí":
+                        index = choices.index(selected)
+                        delete_fermentation(index)
+                        print("Fermentación eliminada correctamente.")
+                    else:
+                        print("Eliminación cancelada.")
         
         elif option == "Calcular cantidad de leche necesaria":
             history = load_history()
             successful = [
                 fermentation for fermentation in history
-                if fermentation["result"] == "buena"
+                if fermentation["result"] == "Buena"
             ]
             if len(successful) < 3:
                 print("Necesitas al menos 3 fermentaciones buenas para hacer la recomendación.")

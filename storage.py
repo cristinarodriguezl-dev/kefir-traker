@@ -19,3 +19,12 @@ def save_fermentation(fermentation):
 
     with open(HISTORY_FILE, "w", encoding="utf-8") as file:
         json.dump(history, file, ensure_ascii=False, indent=4)
+
+#Eliminar fermentaciones
+def delete_fermentation(index):
+    history = load_history()
+    if 0 <= index < len(history):
+        history.pop(index)
+        with open(HISTORY_FILE, "w", encoding="utf-8") as file:
+            json.dump(history, file, ensure_ascii=False, indent=4)
+    
