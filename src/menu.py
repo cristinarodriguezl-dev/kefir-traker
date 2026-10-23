@@ -2,6 +2,7 @@
 import questionary
 from src.calculations import milk_needed, calculate_average_ratio
 from src.storage import load_history, save_fermentation, delete_fermentation
+from src.models import Fermentation
 
 
 def main_menu ():
@@ -36,12 +37,12 @@ def main_menu ():
                 choices=["Buena", "Sobrefermentada", "Insuficiente", "Dañado"]
             ).ask()
 
-            fermentation = {
-                "grains_weight": grains_weight,
-                "milk_ml": milk_ml,
-                "duration_hours": duration_hours,
-                "result": result
-            }
+            fermentation = Fermentation(
+                grains_weight,
+                milk_ml,
+                duration_hours,
+                result
+            )
 
             save_fermentation(fermentation)
             print("Fermentación guardada correctamente.")
@@ -53,7 +54,7 @@ def main_menu ():
                 print("No hay fermentaciones guardadas.")
             else:
                 choices = [
-                    f"{i}. {f['result']} - {f['grains_weight']} g de kéfir, {f['milk_ml']} ml de leche"
+                    f"{i}. {f.result} - {f.grains_weight} g de kéfir, {f.milk_ml} ml de leche"
                     for i, f in enumerate(history, start=1)
                 ]
 
@@ -79,7 +80,7 @@ def main_menu ():
             history = load_history()
             successful = [
                 fermentation for fermentation in history
-                if fermentation["result"] == "Buena"
+                if fermentation.result == "Buena"
             ]
             if len(successful) < 3:
                 print("Necesitas al menos 3 fermentaciones buenas para hacer la recomendación.")
@@ -91,7 +92,7 @@ def main_menu ():
                 best_fermentations = successful[:3]
 
                 ratios = [
-                    fermentation["milk_ml"] / fermentation["grains_weight"]
+                    fermentation.milk_ml / fermentation.grains_weight
                     for fermentation in best_fermentations
                 ]
 
@@ -108,10 +109,10 @@ def main_menu ():
                 for index, fermentation in enumerate(history, start=1):
                     print()
                     print(f"Fermentación {index}")
-                    print(f"Gránulos: {fermentation['grains_weight']}g")
-                    print(f"Leche: {fermentation['milk_ml']}ml")
-                    print(f"Horas de fermentación: {fermentation['duration_hours']}h")
-                    print(f"Resultado: {fermentation['result']}")
+                    print(f"Gránulos: {fermentation.grains_weight}g")
+                    print(f"Leche: {fermentation.milk_ml}ml")
+                    print(f"Horas de fermentación: {fermentation.duration_hours}h")
+                    print(f"Resultado: {fermentation.result}")
                     print("\n***********************")
 
         elif option == "Ver estadísticas":
@@ -121,10 +122,10 @@ def main_menu ():
                 print("No hay fermentaciones registradas.")
             else:
                 total = len(history)
-                good = sum(1 for fermentation in history if fermentation["result"] == "Buena")
-                overfermented = sum(1 for fermentation in history if fermentation["result"] == "Sobrefermentada")
-                insufficient = sum(1 for fermentation in history if fermentation["result"] == "Insuficiente")
-                damage = sum(1 for fermentation in history if fermentation["result"] == "Dañado")
+                good = sum(1 for fermentation in history if fermentation.result == "Buena")
+                overfermented = sum(1 for fermentation in history if fermentation.result == "Sobrefermentada")
+                insufficient = sum(1 for fermentation in history if fermentation.result == "Insuficiente")
+                damage = sum(1 for fermentation in history if fermentation.result == "Dañado")
 
                 print(f"Total: {total}")
                 print(f"Resultados buenos: {good}")
