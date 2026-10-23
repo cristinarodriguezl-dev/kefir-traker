@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
-from models import Fermentation
+from src.models import Fermentation
 
-HISTORY_FILE = Path(__file__).parent / "data" / "history.json"
+HISTORY_FILE = Path(__file__).parent.parent / "data" / "history.json"
 
 
 def load_history():

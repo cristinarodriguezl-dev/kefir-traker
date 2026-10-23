@@ -77,14 +77,8 @@ def main_menu ():
                         print("Eliminación cancelada.")
         
         elif option == "Calcular cantidad de leche necesaria":
-            history = tracker.get_history()
-            successful = [
-                fermentation for fermentation in history
-                if fermentation.result == "Buena"
-            ]
-            if len(successful) < 3:
-                print("Necesitas al menos 3 fermentaciones buenas para hacer la recomendación.")
-
+            if not tracker.has_enough_good_fermentations():
+                print("Necesitas al menos 3 fermentaciones buenas para hacer el cálculo.")
             else:
                 try:
                     grains_weight = float(

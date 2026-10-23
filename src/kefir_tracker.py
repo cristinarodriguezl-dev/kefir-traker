@@ -1,4 +1,3 @@
-
 from src.storage import load_history, save_fermentation, delete_fermentation
 from src.calculations import milk_needed, calculate_average_ratio
 
@@ -29,12 +28,19 @@ class KefirTracker:
             "insufficient": sum(1 for f in self.history if f.result == "Insuficiente"),
             "damaged": sum(1 for f in self.history if f.result == "Dañado")
         }
+        
+    def has_enough_good_fermentations(self):
+        successful = [
+            fermentation for fermentation in self.history
+            if fermentation.result == "Buena"
+        ]
+        return len(successful) >= 3
 
     def calculate_milk(self, grains_weight):
         successful = [
-            f for f in self.history if f.result == "Buena"
+            fermentation for fermentation in self.history if fermentation.result == "Buena"
         ]
-
+        
         if len(successful) < 3:
             raise ValueError(
                 "Necesitas al menos 3 fermentaciones buenas para hacer la recomendación."
@@ -43,8 +49,8 @@ class KefirTracker:
         recent_fermentations = successful[-3:]
 
         ratios = [
-            f.milk_ml / f.grains_weight
-            for f in recent_fermentations
+            fermentation.milk_ml / fermentation.grains_weight
+            for fermentation in recent_fermentations
         ]
 
         ratio = calculate_average_ratio(ratios)
