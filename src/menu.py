@@ -1,11 +1,11 @@
-# pyrefly: ignore[missing-import]
 import questionary
-from src.calculations import milk_needed, calculate_average_ratio
-from src.storage import load_history, save_fermentation, delete_fermentation
+from src.kefir_tracker import KefirTracker
 from src.models import Fermentation
 
 
 def main_menu ():
+    tracker = KefirTracker()
+
     while True:
         option = questionary.select(
             "Menú principal",
@@ -44,11 +44,11 @@ def main_menu ():
                 result
             )
 
-            save_fermentation(fermentation)
+            tracker.register_fermentation(fermentation)
             print("Fermentación guardada correctamente.")
         
         elif option == "Eliminar fermentación":
-            history = load_history()
+            history = tracker.get_history()
 
             if not history:
                 print("No hay fermentaciones guardadas.")
@@ -71,13 +71,13 @@ def main_menu ():
 
                     if confirm == "Sí":
                         index = choices.index(selected)
-                        delete_fermentation(index)
+                        tracker.remove_fermentation(index)
                         print("Fermentación eliminada correctamente.")
                     else:
                         print("Eliminación cancelada.")
         
         elif option == "Calcular cantidad de leche necesaria":
-            history = load_history()
+            history = tracker.get_history()
             successful = [
                 fermentation for fermentation in history
                 if fermentation.result == "Buena"
@@ -86,23 +86,20 @@ def main_menu ():
                 print("Necesitas al menos 3 fermentaciones buenas para hacer la recomendación.")
 
             else:
-                grains_weight = float(
-                questionary.text("Ingrese los gramos de gránulos de kéfir:").ask()
-            )
-                best_fermentations = successful[:3]
-
-                ratios = [
-                    fermentation.milk_ml / fermentation.grains_weight
-                    for fermentation in best_fermentations
-                ]
-
-                ratio = calculate_average_ratio(ratios)
-                milk = milk_needed(grains_weight, ratio)
-                print(f"Cantidad de leche recomendada: {milk:.0f} ml")
+                try:
+                    grains_weight = float(
+                        questionary.text(
+                            "Ingrese los gramos de gránulos de kéfir:"
+                        ).ask()
+                    )
+                    milk = tracker.calculate_milk(grains_weight)
+                    print(f"Cantidad de leche recomendada: {milk:.0f} ml")
+                except ValueError as error:
+                    print(error)
 
 
         elif option =="Consultar historial":
-            history = load_history()
+            history = tracker.get_history()
             if not history:
                 print("No hay fermentaciones registradas")
             else:
@@ -116,25 +113,27 @@ def main_menu ():
                     print("\n***********************")
 
         elif option == "Ver estadísticas":
-            history = load_history()
+            history = tracker.get_history()
 
-            if not history:
+            stats = tracker.get_statistics()
+
+            total = stats["total"]
+
+            if total == 0:
                 print("No hay fermentaciones registradas.")
             else:
-                total = len(history)
-                good = sum(1 for fermentation in history if fermentation.result == "Buena")
-                overfermented = sum(1 for fermentation in history if fermentation.result == "Sobrefermentada")
-                insufficient = sum(1 for fermentation in history if fermentation.result == "Insuficiente")
-                damage = sum(1 for fermentation in history if fermentation.result == "Dañado")
+                good = stats["good"]
+                overfermented = stats["overfermented"]
+                insufficient = stats["insufficient"]
+                damage = stats["damaged"]
+                good_percentage = good / total * 100
 
+                print("\n-- ESTADÍSTICAS DE FERMENTACIÓN --\n")
                 print(f"Total: {total}")
                 print(f"Resultados buenos: {good}")
                 print(f"Sobrefermentaciones: {overfermented}")
                 print(f"Fermentaciones insuficientes: {insufficient}")
                 print(f"Dañadas: {damage}")
-
-                good_percentage = (good / total * 100)
-
                 print(f"Porcentaje de éxito: {good_percentage:.1f}%")
 
                 if overfermented > insufficient and overfermented > damage:
