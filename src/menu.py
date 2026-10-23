@@ -1,6 +1,7 @@
 import questionary
 from src.kefir_tracker import KefirTracker
 from src.models import Fermentation
+from src.validations import ask_positive_number
 
 
 def main_menu ():
@@ -80,12 +81,13 @@ def main_menu ():
             if not tracker.has_enough_good_fermentations():
                 print("Necesitas al menos 3 fermentaciones buenas para hacer el cálculo.")
             else:
+                grains_weight = ask_positive_number(
+                    "Ingrese los gramos de gránulos de kéfir:"
+                )
+
+                if grains_weight is None:
+                    continue
                 try:
-                    grains_weight = float(
-                        questionary.text(
-                            "Ingrese los gramos de gránulos de kéfir:"
-                        ).ask()
-                    )
                     milk = tracker.calculate_milk(grains_weight)
                     print(f"Cantidad de leche recomendada: {milk:.0f} ml")
                 except ValueError as error:
