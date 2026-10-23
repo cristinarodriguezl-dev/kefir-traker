@@ -1,6 +1,6 @@
 import questionary
 from src.kefir_tracker import KefirTracker
-from src.models import Fermentation
+from src.models import Fermentation, GoodFermentation, DamagedFermentation, InsufficientFermentation, OverfermentedFermentation
 from src.validations import ask_positive_number
 
 
@@ -38,15 +38,23 @@ def main_menu ():
                 choices=["Buena", "Sobrefermentada", "Insuficiente", "Dañado"]
             ).ask()
 
-            fermentation = Fermentation(
+            fermentation_classes = {
+                "Buena": GoodFermentation,
+                "Dañado": DamagedFermentation,
+                "Insuficiente": InsufficientFermentation,
+                "Sobrefermentada": OverfermentedFermentation
+            }
+
+            fermentation_class = fermentation_classes[result]
+
+            fermentation = fermentation_class(
                 grains_weight,
                 milk_ml,
-                duration_hours,
-                result
+                duration_hours
             )
 
             tracker.register_fermentation(fermentation)
-            print("Fermentación guardada correctamente.")
+            print(fermentation.describe_result())
         
         elif option == "Eliminar fermentación":
             history = tracker.get_history()
@@ -132,9 +140,11 @@ def main_menu ():
                 print(f"Dañadas: {damage}")
                 print(f"Porcentaje de éxito: {good_percentage:.1f}%")
 
-                if overfermented > insufficient and overfermented > damage:
+                if overfermented > insufficient and overfermented > damage and overfermented > good:
                     print("\nSugerencia: Reduce las horas de fermentación o la temperatura a la que fermentan tus gránulos.\n")
-                elif insufficient > overfermented and insufficient > damage:
+                elif insufficient > overfermented and insufficient > damage and insufficient > good:
                     print("\nSugerencia: Aumenta las horas de fermentación o la cantidad de leche.\n")
-                elif damage > overfermented and damage > insufficient:
+                elif damage > overfermented and damage > insufficient and damage > good:
                     print("\nSugerencia: Revisa tus gránulos de kéfir. Puede ser necesario reemplazarlos, cambiar su lugar de fermentación o lavar cuidadosamente los utensilios que usas.\n")
+                elif good > overfermented and good > insufficient and good > damage:
+                    print("\nSugerencia: Tu kéfir va muy bien, ¡mantén las condiciones actuales!\n")
